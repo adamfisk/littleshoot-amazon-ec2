@@ -57,7 +57,7 @@ public class AmazonEc2Utils
         // addressing is ever different from 10.253.
         try
             {
-            if (!NetworkUtils.getLocalHost().getHostAddress().startsWith("10.253"))
+            if (!onEc2())
                 {
                 // Not running on EC2.  We might be testing, or this might be
                 // a server running on another system.
@@ -108,6 +108,26 @@ public class AmazonEc2Utils
         finally 
             {
             method.releaseConnection();
+            }
+        }
+
+    /**
+     * Returns whether or not we're running on EC2.
+     * 
+     * @return <code>true</code> if we're running on EC2, otherwise 
+     * <code>false</code>.
+     */
+    public static boolean onEc2()
+        {
+        // Good enough for now to determine if we're running on EC2.
+        try
+            {
+            return NetworkUtils.getLocalHost().getHostAddress().startsWith("10.253");
+            }
+        catch (final UnknownHostException e)
+            {
+            LOG.warn("Unknown host", e);
+            return false;
             }
         }
     }
