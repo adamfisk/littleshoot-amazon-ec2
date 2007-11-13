@@ -1,10 +1,8 @@
 package org.lastbamboo.common.amazon.ec2;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -22,40 +20,28 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang.StringUtils;
 import org.lastbamboo.common.amazon.stack.Base64;
 import org.lastbamboo.common.http.client.HttpClientGetRequester;
 import org.lastbamboo.common.util.CandidateProvider;
-import org.lastbamboo.common.util.NetworkUtils;
 import org.lastbamboo.common.util.Pair;
-import org.lastbamboo.common.util.RuntimeIoException;
 import org.lastbamboo.common.util.UriUtils;
 import org.lastbamboo.common.util.xml.XPathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Utility methods for EC2. 
+ * Class for accessing addresses of our EC2 servers. 
  */
-public class AmazonEc2UtilsImpl implements AmazonEc2Utils, 
-    CandidateProvider<InetAddress>
+public class AmazonEc2CandidateProvider 
+    implements CandidateProvider<InetAddress>
     {
     
     private static final Logger LOG = 
-        LoggerFactory.getLogger(AmazonEc2UtilsImpl.class);
-    
-    private static InetAddress s_cachedAddress;
-
-    private static long s_lastUpdateTime = 0L;
+        LoggerFactory.getLogger(AmazonEc2CandidateProvider.class);
 
     private String m_accessKey;
     private String m_accessKeyId;
@@ -63,27 +49,30 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils,
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     
     /**
-     * Creates a new {@link AmazonEc2UtilsImpl} instance using the specified
+     * Creates a new {@link AmazonEc2CandidateProvider} instance using the specified
      * Amazon access key and access key ID.
      * 
      * @param accessKeyId The access key ID.
      * @param accessKey The access key.
      */
-    public AmazonEc2UtilsImpl(final String accessKeyId, final String accessKey)
+    public AmazonEc2CandidateProvider(final String accessKeyId, final String accessKey)
         {
         m_accessKeyId = accessKeyId;
         m_accessKey = accessKey;
+        LOG.debug("Using keys: {}, {}", accessKeyId, accessKey);
         }
     
     /**
-     * Creates a new {@link AmazonEc2UtilsImpl} instance that should only be
+     * Creates a new {@link AmazonEc2CandidateProvider} instance that should only be
      * used for calls that don't require authentication.
      */
-    public AmazonEc2UtilsImpl()
+    public AmazonEc2CandidateProvider()
         {
-        this("", "");
+        this(System.getenv("EC2_ACCESS_KEY_ID"), 
+             System.getenv("EC2_ACCESS_KEY"));
         }
 
+    /*
     public void setAccessKeyIdResource(final Resource accessKeyIdResource)
         {
         this.m_accessKeyId = getStringFromResource(accessKeyIdResource);
@@ -112,9 +101,23 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils,
             throw new RuntimeIoException("Could not read file: "+resource, e);
             }
         }
+        */
     
+    /**
+     * Returns the {@link InetSocketAddress}es of the instances with the
+     * specified group ID.
+     * 
+     * @param groupId The group ID of the instances to look for.
+     * @return A {@link Collection} of {@link InetAddress}es of all
+     * instances matching the specified group ID.
+     */
     public Collection<InetAddress> getInstanceAddresses(final String groupId)
         {
+        if (StringUtils.isBlank(m_accessKeyId) || 
+            StringUtils.isBlank(m_accessKey))
+            {
+            throw new IllegalArgumentException("Keys not set");
+            }
         final HttpClientGetRequester requester = new HttpClientGetRequester();
         final List<Pair<String, String>> params = 
             new LinkedList<Pair<String,String>>();
@@ -255,78 +258,6 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils,
             }
         }
     
-    public InetAddress getPublicAddress()
-        {
-        // First just check if we're even on Amazon -- we could be testing
-        // locally, for example.
-        LOG.debug("Getting public address");
-        
-        final long now = System.currentTimeMillis();
-        if ((now - s_lastUpdateTime) < DateUtils.MILLIS_PER_MINUTE)
-            {
-            LOG.debug("Using cached address...");
-            return s_cachedAddress;
-            }
-        
-        // Check to see if we're running on EC2.  If we're not, we're probably 
-        // testing.  This technique could be a problem if the EC2 internal 
-        // addressing is ever different from 10.253.
-        try
-            {
-            if (!NetworkUtils.getLocalHost().getHostAddress().startsWith("10.253"))
-                {
-                // Not running on EC2.  We might be testing, or this might be
-                // a server running on another system.
-                LOG.debug("Not running on EC2.");
-                return NetworkUtils.getLocalHost();
-                }
-            }
-        catch (final UnknownHostException e)
-            {
-            LOG.error("Could not get host.", e);
-            return null;
-            }
-        final String url = "http://169.254.169.254/latest/meta-data/public-ipv4";
-        final HttpClient client = new HttpClient();
-        client.getHttpConnectionManager().getParams().setConnectionTimeout(
-            10 * 1000);
-        final GetMethod method = new GetMethod(url);
-        try
-            {
-            LOG.debug("Executing method...");
-            final int statusCode = client.executeMethod(method);
-            if (statusCode != HttpStatus.SC_OK)
-                {
-                LOG.warn("ERROR ISSUING REQUEST:\n" + method.getStatusLine() + 
-                    "\n" + method.getResponseBodyAsString());
-                return null;
-                }
-            else
-                {
-                LOG.debug("Successfully received response...");
-                }
-            final String host = method.getResponseBodyAsString();
-            LOG.debug("Got address: "+host);
-            s_cachedAddress = InetAddress.getByName(host);
-            s_lastUpdateTime = System.currentTimeMillis();
-            return s_cachedAddress;
-            }
-        catch (final HttpException e)
-            {
-            LOG.error("Could not access EC2 service", e);
-            return null;
-            }
-        catch (final IOException e)
-            {
-            LOG.error("Could not access EC2 service", e);
-            return null;
-            }
-        finally 
-            {
-            method.releaseConnection();
-            }
-        }
-
     public InetAddress getCandidate()
         {
         final Collection<InetAddress> addresses = 

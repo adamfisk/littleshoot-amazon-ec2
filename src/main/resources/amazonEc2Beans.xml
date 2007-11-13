@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-        
+      
+	<!--
+		Props file containing our EC2 values.
+	-->
+	<bean id="ec2Props" 
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>file:${user.home}/.ec2/ec2.properties</value>
+			</list>
+		</property>
+	</bean>
+
     <!-- 
-        The utilities class for accessing EC2
+        The class for accessing running EC2 instances.
     -->
-    <bean id="amazonEc2Utils"
-        class="org.lastbamboo.common.amazon.ec2.AmazonEc2UtilsImpl">
-		<property name="accessKeyIdResource" value="file:///Users/afisk/.m2/amazonAccessKeyId"/>
-        <property name="accessKeyResource" value="file:///Users/afisk/.m2/amazonAccessKey"/>
+    <bean id="amazonEc2CandidateProvider"
+        class="org.lastbamboo.common.amazon.ec2.AmazonEc2CandidateProvider">
+		<constructor-arg value="${accessKeyId}"/>
+		<constructor-arg value="${accessKey}"/>
         </bean>
-        
+  
     </beans>
