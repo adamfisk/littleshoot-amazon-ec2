@@ -55,8 +55,8 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
 
     private static long s_lastUpdateTime = 0L;
 
-    private final String m_accessKey;
-    private final String m_accessKeyId;
+    private String m_accessKey;
+    private String m_accessKeyId;
     
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     
@@ -68,12 +68,11 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
      * @param accessKeyId The Spring {@link Resource} pointing to the access key 
      * id.
      */
-    public AmazonEc2UtilsImpl(final Resource accessKey, 
-        final Resource accessKeyId)
-        {
-        this(getStringFromResource(accessKey), 
-             getStringFromResource(accessKeyId));
-        }
+    //public AmazonEc2UtilsImpl()
+    //    {
+        //this(getStringFromResource(accessKey), 
+          //   getStringFromResource(accessKeyId));
+      //  }
     
     private static String getStringFromResource(final Resource resource)
         {
@@ -81,7 +80,9 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
             {
             final File file = resource.getFile();
             final InputStream is = new FileInputStream(file);
-            return IOUtils.toString(is);
+            final String resourceString = IOUtils.toString(is).trim();
+            LOG.debug("Returning resource: {}", resourceString);
+            return resourceString;
             }
         catch (final IOException e)
             {
@@ -112,6 +113,18 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
         this("", "");
         }
 
+    public void setAccessKeyIdResource(final Resource accessKeyIdResource)
+        {
+        this.m_accessKeyId = getStringFromResource(accessKeyIdResource);
+        LOG.debug("Using key id: {}", this.m_accessKeyId);
+        }
+    
+    public void setAccessKeyResource(final Resource accessKeyResource)
+        {
+        this.m_accessKey = getStringFromResource(accessKeyResource);
+        LOG.debug("Using key: {}", this.m_accessKey);
+        }
+    
     public Collection<InetAddress> getInstanceAddresses(final String groupId)
         {
         final HttpClientGetRequester requester = new HttpClientGetRequester();

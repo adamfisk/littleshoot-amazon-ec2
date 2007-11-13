@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+        
+    <!-- 
+        The utilities class for accessing EC2
+    -->
+    <bean id="amazonEc2Utils"
+        class="org.lastbamboo.common.amazon.ec2.AmazonEc2UtilsImpl">
+		<property name="accessKeyIdResource" value="file:///Users/afisk/.m2/amazonAccessKeyId"/>
+        <property name="accessKeyResource" value="file:///Users/afisk/.m2/amazonAccessKey"/>
+        </bean>
+        
+    </beans>

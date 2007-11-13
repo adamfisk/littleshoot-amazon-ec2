@@ -4,6 +4,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 
+/**
+ * Interface for Amazon EC2 utilities. 
+ */
 public interface AmazonEc2Utils
     {
     
