@@ -30,6 +30,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.lastbamboo.common.amazon.stack.Base64;
 import org.lastbamboo.common.http.client.HttpClientGetRequester;
+import org.lastbamboo.common.util.CandidateProvider;
 import org.lastbamboo.common.util.NetworkUtils;
 import org.lastbamboo.common.util.Pair;
 import org.lastbamboo.common.util.RuntimeIoException;
@@ -45,7 +46,8 @@ import org.xml.sax.SAXException;
 /**
  * Utility methods for EC2. 
  */
-public class AmazonEc2UtilsImpl implements AmazonEc2Utils
+public class AmazonEc2UtilsImpl implements AmazonEc2Utils, 
+    CandidateProvider<InetAddress>
     {
     
     private static final Logger LOG = 
@@ -60,37 +62,6 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
     
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     
-    /**
-     * Creates a new {@link AmazonEc2UtilsImpl} instance using the specified
-     * Spring resources to look up the key and key ID.
-     * 
-     * @param accessKey The Spring {@link Resource} pointing to the access key.
-     * @param accessKeyId The Spring {@link Resource} pointing to the access key 
-     * id.
-     */
-    //public AmazonEc2UtilsImpl()
-    //    {
-        //this(getStringFromResource(accessKey), 
-          //   getStringFromResource(accessKeyId));
-      //  }
-    
-    private static String getStringFromResource(final Resource resource)
-        {
-        try
-            {
-            final File file = resource.getFile();
-            final InputStream is = new FileInputStream(file);
-            final String resourceString = IOUtils.toString(is).trim();
-            LOG.debug("Returning resource: {}", resourceString);
-            return resourceString;
-            }
-        catch (final IOException e)
-            {
-            LOG.error("Could not access key file: {}", resource, e);
-            throw new RuntimeIoException("Could not read file: "+resource, e);
-            }
-        }
-
     /**
      * Creates a new {@link AmazonEc2UtilsImpl} instance using the specified
      * Amazon access key and access key ID.
@@ -123,6 +94,23 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
         {
         this.m_accessKey = getStringFromResource(accessKeyResource);
         LOG.debug("Using key: {}", this.m_accessKey);
+        }
+    
+    private static String getStringFromResource(final Resource resource)
+        {
+        try
+            {
+            final File file = resource.getFile();
+            final InputStream is = new FileInputStream(file);
+            final String resourceString = IOUtils.toString(is).trim();
+            LOG.debug("Returning resource: {}", resourceString);
+            return resourceString;
+            }
+        catch (final IOException e)
+            {
+            LOG.error("Could not access key file: {}", resource, e);
+            throw new RuntimeIoException("Could not read file: "+resource, e);
+            }
         }
     
     public Collection<InetAddress> getInstanceAddresses(final String groupId)
@@ -165,7 +153,7 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
         // TODO: We should set the group ID here so we only query nodes running
         // with the group ID we're interested in.  For now, we only run a single
         // instance, so we're OK.
-        final Collection<InetAddress> addresses = new LinkedList<InetAddress>();
+        final List<InetAddress> addresses = new LinkedList<InetAddress>();
         try
             {
             final XPathUtils xPath = XPathUtils.newXPath(body);
@@ -198,6 +186,9 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
             {
             LOG.error("XPath error!!", e);
             }
+        
+        // Give them out in just a random order for now.
+        Collections.shuffle(addresses);
         return addresses;
         }
 
@@ -334,5 +325,17 @@ public class AmazonEc2UtilsImpl implements AmazonEc2Utils
             {
             method.releaseConnection();
             }
+        }
+
+    public InetAddress getCandidate()
+        {
+        final Collection<InetAddress> addresses = 
+            getInstanceAddresses("sip-turn");
+        return addresses.iterator().next();
+        }
+
+    public Collection<InetAddress> getCandidates()
+        {
+        return getInstanceAddresses("sip-turn");
         }
     }
