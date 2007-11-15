@@ -63,47 +63,6 @@ public class AmazonEc2CandidateProvider
         }
     
     /**
-     * Creates a new {@link AmazonEc2CandidateProvider} instance that should only be
-     * used for calls that don't require authentication.
-     */
-    public AmazonEc2CandidateProvider()
-        {
-        this(System.getenv("EC2_ACCESS_KEY_ID"), 
-             System.getenv("EC2_ACCESS_KEY"));
-        }
-
-    /*
-    public void setAccessKeyIdResource(final Resource accessKeyIdResource)
-        {
-        this.m_accessKeyId = getStringFromResource(accessKeyIdResource);
-        LOG.debug("Using key id: {}", this.m_accessKeyId);
-        }
-    
-    public void setAccessKeyResource(final Resource accessKeyResource)
-        {
-        this.m_accessKey = getStringFromResource(accessKeyResource);
-        LOG.debug("Using key: {}", this.m_accessKey);
-        }
-    
-    private static String getStringFromResource(final Resource resource)
-        {
-        try
-            {
-            final File file = resource.getFile();
-            final InputStream is = new FileInputStream(file);
-            final String resourceString = IOUtils.toString(is).trim();
-            LOG.debug("Returning resource: {}", resourceString);
-            return resourceString;
-            }
-        catch (final IOException e)
-            {
-            LOG.error("Could not access key file: {}", resource, e);
-            throw new RuntimeIoException("Could not read file: "+resource, e);
-            }
-        }
-        */
-    
-    /**
      * Returns the {@link InetSocketAddress}es of the instances with the
      * specified group ID.
      * 
