@@ -102,13 +102,19 @@ public class AmazonEc2CandidateProvider
         // calculating itself.
         params.add(UriUtils.pair("Signature", sig));
         
-        // The trailing slash is necessary in the address.
-        final String body = 
-            requester.request("https://ec2.amazonaws.com/", params);
-        //LOG.debug("Received body:\n{}", body);
-        LOG.debug("Received body");
-        
-        return extractInetAddresses(groupId, body);
+        try
+            {
+            // The trailing slash is necessary in the address.
+            final String body = 
+                requester.request("https://ec2.amazonaws.com/", params);
+            LOG.debug("Received body");
+            return extractInetAddresses(groupId, body);
+            }
+        catch (final Exception e)
+            {
+            LOG.error("Error accessing server data", e);
+            return Collections.emptySet();
+            }
         }
     
     private Collection<InetAddress> extractInetAddresses(
