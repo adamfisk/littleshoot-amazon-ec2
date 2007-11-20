@@ -105,7 +105,8 @@ public class AmazonEc2CandidateProvider
         // The trailing slash is necessary in the address.
         final String body = 
             requester.request("https://ec2.amazonaws.com/", params);
-        LOG.debug("Received body:\n{}", body);
+        //LOG.debug("Received body:\n{}", body);
+        LOG.debug("Received body");
         
         return extractInetAddresses(groupId, body);
         }
