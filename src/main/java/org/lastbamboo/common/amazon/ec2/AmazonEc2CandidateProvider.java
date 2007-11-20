@@ -49,13 +49,14 @@ public class AmazonEc2CandidateProvider
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     
     /**
-     * Creates a new {@link AmazonEc2CandidateProvider} instance using the specified
-     * Amazon access key and access key ID.
+     * Creates a new {@link AmazonEc2CandidateProvider} instance using the 
+     * specified Amazon access key and access key ID.
      * 
      * @param accessKeyId The access key ID.
      * @param accessKey The access key.
      */
-    public AmazonEc2CandidateProvider(final String accessKeyId, final String accessKey)
+    public AmazonEc2CandidateProvider(final String accessKeyId, 
+        final String accessKey)
         {
         m_accessKeyId = accessKeyId;
         m_accessKey = accessKey;
