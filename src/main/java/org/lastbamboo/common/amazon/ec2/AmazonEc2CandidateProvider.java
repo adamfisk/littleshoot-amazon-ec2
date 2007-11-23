@@ -60,7 +60,6 @@ public class AmazonEc2CandidateProvider
         {
         m_accessKeyId = accessKeyId;
         m_accessKey = accessKey;
-        LOG.debug("Using keys: {}, {}", accessKeyId, accessKey);
         }
     
     /**
