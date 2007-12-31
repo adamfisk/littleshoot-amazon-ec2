@@ -33,7 +33,7 @@ public class AmazonEc2Utils
     
     /**
      * Accesses the public address for the EC2 instance.  This is necessary
-     * because InetAddress.getLocalHost() will yeild the private, NATted
+     * because InetAddress.getLocalHost() will yield the private, NATted
      * address.
      * 
      * @return The public address for the EC2 instance, or <code>null</code> if
