@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Test for Amazon EC2 utlities.
+ * Test for Amazon EC2 utilities.
  */
 public class AmazonEc2CandidateProviderTest
     {
@@ -45,8 +45,7 @@ public class AmazonEc2CandidateProviderTest
         final AmazonEc2CandidateProvider ec2 = 
             new AmazonEc2CandidateProvider(keyId, key);
         
-        final Collection<InetAddress> instances = 
-            ec2.getInstanceAddresses("sip-turn");
+        final Collection<InetAddress> instances = ec2.getInstanceAddresses("sip-turn");
         
         assertEquals(
             InetAddress.getByName("ec2-67-202-6-199.z-1.compute-1.amazonaws.com"), 

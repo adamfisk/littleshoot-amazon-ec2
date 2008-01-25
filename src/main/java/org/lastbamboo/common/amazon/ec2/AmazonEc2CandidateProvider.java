@@ -119,15 +119,15 @@ public class AmazonEc2CandidateProvider
     private Collection<InetAddress> extractInetAddresses(
         final String groupId, final String body)
         {
-        // TODO: We should set the group ID here so we only query nodes running
-        // with the group ID we're interested in.  For now, we only run a single
-        // instance, so we're OK.
         final List<InetAddress> addresses = new LinkedList<InetAddress>();
         try
             {
             final XPathUtils xPath = XPathUtils.newXPath(body);
+            
+            // Use XPath to select only the servers in the desired group.
             final String path = 
-                "/DescribeInstancesResponse/reservationSet/item/instancesSet/item/dnsName";
+                "/DescribeInstancesResponse/reservationSet/" +
+                "item[groupSet/item[groupId='"+groupId+"']]/instancesSet/item/dnsName";
             final NodeList nodes = xPath.getNodes(path);
             for (int i = 0; i < nodes.getLength(); i++)
                 {
