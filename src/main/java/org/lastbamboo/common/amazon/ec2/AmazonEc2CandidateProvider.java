@@ -125,9 +125,20 @@ public class AmazonEc2CandidateProvider
             final XPathUtils xPath = XPathUtils.newXPath(body);
             
             // Use XPath to select only the servers in the desired group.
-            final String path = 
+            String path = 
                 "/DescribeInstancesResponse/reservationSet/" +
-                "item[groupSet/item[groupId='"+groupId+"']]/instancesSet/item/dnsName";
+                "item[groupSet/item[groupId='"+groupId+"']]/instancesSet/item/";
+            
+            // We can't use the public address if we're running on EC2 internally -- we
+            // need to use the private one behind the NAT.
+            if (AmazonEc2Utils.onEc2())
+                {
+                path += "privateDnsName";
+                }
+            else
+                {
+                path += "dnsName";
+                }
             final NodeList nodes = xPath.getNodes(path);
             for (int i = 0; i < nodes.getLength(); i++)
                 {
