@@ -3,18 +3,6 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-    <!--
-        Props file containing our EC2 values.
-    -->
-    <bean id="ec2Props" 
-        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations">
-            <list>
-                <value>file:${user.home}/.ec2/ec2.properties</value>
-            </list>
-        </property>
-    </bean>
-
     <!-- 
         The class for accessing running EC2 instances.  Note this retrieves the props
         through a PropertyPlaceholderConfigurer that loads a local props file
