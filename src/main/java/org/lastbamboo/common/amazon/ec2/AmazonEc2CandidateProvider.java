@@ -120,6 +120,7 @@ public class AmazonEc2CandidateProvider
         final String groupId, final String body)
         {
         final List<InetAddress> addresses = new LinkedList<InetAddress>();
+        LOG.debug("Got body: "+body);
         try
             {
             final XPathUtils xPath = XPathUtils.newXPath(body);
