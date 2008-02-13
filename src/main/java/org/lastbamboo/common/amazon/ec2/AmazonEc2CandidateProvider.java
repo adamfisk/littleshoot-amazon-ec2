@@ -149,16 +149,18 @@ public class AmazonEc2CandidateProvider
                 {
                 final Node node = nodes.item(i);
                 final String urlString = node.getTextContent();
+                
+                // When instances are shutting down, they'll still appear here, but with
+                // blank addresses.  We have to make sure we only return public addresses.
+                if (StringUtils.isBlank(urlString))
+                    {
+                    LOG.debug("Not using blank address");
+                    continue;
+                    }
                 try
                     {
                     final InetAddress address = InetAddress.getByName(urlString);
-                    
-                    // When instances are shutting down, they'll still appear here, but with
-                    // blank addresses.  We have to make sure we only return public addresses.
-                    if (NetworkUtils.isPublicAddress(address))
-                        {
-                        addresses.add(address);
-                        };
+                    addresses.add(address);
                     }
                 catch (final UnknownHostException e)
                     {
