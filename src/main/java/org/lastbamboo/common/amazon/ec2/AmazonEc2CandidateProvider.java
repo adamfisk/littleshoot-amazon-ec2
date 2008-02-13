@@ -24,9 +24,11 @@ import org.apache.commons.lang.StringUtils;
 import org.lastbamboo.common.amazon.stack.Base64;
 import org.lastbamboo.common.http.client.HttpClientGetRequester;
 import org.lastbamboo.common.util.CandidateProvider;
+import org.lastbamboo.common.util.NetworkUtils;
 import org.lastbamboo.common.util.Pair;
 import org.lastbamboo.common.util.UriUtils;
 import org.lastbamboo.common.util.xml.XPathUtils;
+import org.lastbamboo.common.util.xml.XmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -149,7 +151,14 @@ public class AmazonEc2CandidateProvider
                 final String urlString = node.getTextContent();
                 try
                     {
-                    addresses.add(InetAddress.getByName(urlString));
+                    final InetAddress address = InetAddress.getByName(urlString);
+                    
+                    // When instances are shutting down, they'll still appear here, but with
+                    // blank addresses.  We have to make sure we only return public addresses.
+                    if (NetworkUtils.isPublicAddress(address))
+                        {
+                        addresses.add(address);
+                        };
                     }
                 catch (final UnknownHostException e)
                     {
