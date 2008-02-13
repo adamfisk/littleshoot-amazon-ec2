@@ -122,7 +122,7 @@ public class AmazonEc2Utils
         // Good enough for now to determine if we're running on EC2.
         try
             {
-            return NetworkUtils.getLocalHost().getHostAddress().startsWith("10.253");
+            return NetworkUtils.getLocalHost().getHostAddress().startsWith("10.25");
             }
         catch (final UnknownHostException e)
             {
