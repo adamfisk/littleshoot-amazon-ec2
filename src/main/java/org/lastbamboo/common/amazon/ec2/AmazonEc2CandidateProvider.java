@@ -21,8 +21,8 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
-import org.lastbamboo.common.amazon.stack.Base64;
 import org.lastbamboo.common.http.client.HttpClientGetRequester;
+import org.lastbamboo.common.util.Base64;
 import org.lastbamboo.common.util.CandidateProvider;
 import org.lastbamboo.common.util.Pair;
 import org.lastbamboo.common.util.UriUtils;
