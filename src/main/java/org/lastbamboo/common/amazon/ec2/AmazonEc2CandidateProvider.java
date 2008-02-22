@@ -131,7 +131,6 @@ public class AmazonEc2CandidateProvider
             
             // We can't use the public address if we're running on EC2 internally -- we
             // need to use the private one behind the NAT.
-            /*
             if (AmazonEc2Utils.onEc2())
                 {
                 path += "privateDnsName";
@@ -140,8 +139,6 @@ public class AmazonEc2CandidateProvider
                 {
                 path += "dnsName";
                 }
-                */
-            path += "dnsName";
             final NodeList nodes = xPath.getNodes(path);
             for (int i = 0; i < nodes.getLength(); i++)
                 {
