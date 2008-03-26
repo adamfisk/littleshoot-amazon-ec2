@@ -45,6 +45,12 @@ public class AmazonEc2CandidateProvider
 
     private String m_accessKey;
     private String m_accessKeyId;
+
+    /**
+     * The {@link Collection} of the last valid set of candidates.
+     */
+    private Collection<InetAddress> m_lastValidAddresses =
+        new LinkedList<InetAddress>();
     
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     
@@ -93,7 +99,6 @@ public class AmazonEc2CandidateProvider
         params.add (UriUtils.pair ("Timestamp", date));
         params.add (UriUtils.pair ("Version", "2007-08-29"));
         
-        
         final String sig = calculateRfc2104Hmac(params);
         
         // Note the signature is just another parameter -- it doesn't need
@@ -112,7 +117,7 @@ public class AmazonEc2CandidateProvider
         catch (final Exception e)
             {
             LOG.error("Error accessing server data", e);
-            return Collections.emptySet();
+            return this.m_lastValidAddresses;
             }
         }
     
@@ -129,8 +134,8 @@ public class AmazonEc2CandidateProvider
                 "/DescribeInstancesResponse/reservationSet/" +
                 "item[groupSet/item[groupId='"+groupId+"']]/instancesSet/item/";
             
-            // We can't use the public address if we're running on EC2 internally -- we
-            // need to use the private one behind the NAT.
+            // We can't use the public address if we're running on EC2 
+            // internally -- we need to use the private one behind the NAT.
             /*
             if (AmazonEc2Utils.onEc2())
                 {
@@ -148,8 +153,9 @@ public class AmazonEc2CandidateProvider
                 final Node node = nodes.item(i);
                 final String urlString = node.getTextContent();
                 
-                // When instances are shutting down, they'll still appear here, but with
-                // blank addresses.  We have to make sure we only return public addresses.
+                // When instances are shutting down, they'll still appear here, 
+                // but with blank addresses.  We have to make sure we only 
+                // return public addresses.
                 if (StringUtils.isBlank(urlString))
                     {
                     LOG.debug("Not using blank address");
@@ -157,7 +163,8 @@ public class AmazonEc2CandidateProvider
                     }
                 try
                     {
-                    final InetAddress address = InetAddress.getByName(urlString);
+                    final InetAddress address = 
+                        InetAddress.getByName(urlString);
                     addresses.add(address);
                     }
                 catch (final UnknownHostException e)
@@ -179,6 +186,7 @@ public class AmazonEc2CandidateProvider
             LOG.error("XPath error!!", e);
             }
         
+        this.m_lastValidAddresses = addresses;
         // Give them out in just a random order for now.
         Collections.shuffle(addresses);
         return addresses;
