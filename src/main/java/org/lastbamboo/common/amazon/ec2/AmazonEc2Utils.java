@@ -5,10 +5,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpConnectionManager;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.time.DateUtils;
+import org.lastbamboo.common.http.client.HttpClientManager;
+import org.lastbamboo.common.http.client.HttpClientManagerImpl;
 import org.lastbamboo.common.util.NetworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,9 +74,9 @@ public class AmazonEc2Utils
             return null;
             }
         final String url = "http://169.254.169.254/latest/meta-data/public-ipv4";
-        final HttpClient client = new HttpClient();
+        final HttpClientManager client = new HttpClientManagerImpl();
         client.getHttpConnectionManager().getParams().setConnectionTimeout(
-            10 * 1000);
+            20 * 1000);
         final GetMethod method = new GetMethod(url);
         try
             {
