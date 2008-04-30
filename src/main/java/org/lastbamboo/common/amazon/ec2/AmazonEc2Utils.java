@@ -10,8 +10,8 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.time.DateUtils;
-import org.lastbamboo.common.http.client.HttpClientManager;
-import org.lastbamboo.common.http.client.HttpClientManagerImpl;
+import org.lastbamboo.common.util.DefaultHttpClient;
+import org.lastbamboo.common.util.DefaultHttpClientImpl;
 import org.lastbamboo.common.util.NetworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +74,7 @@ public class AmazonEc2Utils
             return null;
             }
         final String url = "http://169.254.169.254/latest/meta-data/public-ipv4";
-        final HttpClientManager client = new HttpClientManagerImpl();
+        final DefaultHttpClient client = new DefaultHttpClientImpl();
         client.getHttpConnectionManager().getParams().setConnectionTimeout(
             20 * 1000);
         final GetMethod method = new GetMethod(url);
