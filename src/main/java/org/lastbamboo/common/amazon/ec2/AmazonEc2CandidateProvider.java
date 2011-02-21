@@ -22,11 +22,11 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.lastbamboo.common.http.client.HttpClientGetRequester;
-import org.lastbamboo.common.util.Base64;
-import org.lastbamboo.common.util.CandidateProvider;
-import org.lastbamboo.common.util.Pair;
-import org.lastbamboo.common.util.UriUtils;
-import org.lastbamboo.common.util.xml.XPathUtils;
+import org.littleshoot.util.Base64;
+import org.littleshoot.util.CandidateProvider;
+import org.littleshoot.util.Pair;
+import org.littleshoot.util.UriUtils;
+import org.littleshoot.util.xml.XPathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;

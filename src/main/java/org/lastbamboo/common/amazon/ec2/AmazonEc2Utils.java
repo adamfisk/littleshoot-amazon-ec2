@@ -8,9 +8,9 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.time.DateUtils;
-import org.lastbamboo.common.util.DefaultHttpClient;
-import org.lastbamboo.common.util.DefaultHttpClientImpl;
-import org.lastbamboo.common.util.NetworkUtils;
+import org.littleshoot.util.DefaultHttpClient;
+import org.littleshoot.util.DefaultHttpClientImpl;
+import org.littleshoot.util.NetworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
