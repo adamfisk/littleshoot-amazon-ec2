@@ -65,12 +65,6 @@
 
         <dependency>
             <groupId>org.littleshoot</groupId>
-            <artifactId>mina-port</artifactId>
-            <version>1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.littleshoot</groupId>
             <artifactId>util</artifactId>
             <version>${ls.version}</version>
         </dependency> 
