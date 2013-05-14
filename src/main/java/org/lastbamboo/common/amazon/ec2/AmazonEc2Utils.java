@@ -17,20 +17,18 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility methods for Amazon EC2. 
  */
-public class AmazonEc2Utils
-    {
+public class AmazonEc2Utils {
 
-    private static final Logger LOG = 
-        LoggerFactory.getLogger(AmazonEc2Utils.class);
-    
+    private static final Logger LOG = LoggerFactory
+            .getLogger(AmazonEc2Utils.class);
+
     private static InetAddress s_cachedAddress;
 
     private static long s_lastUpdateTime = 0L;
-    
-    private AmazonEc2Utils()
-        {
+
+    private AmazonEc2Utils() {
         // Should not be constructed.
-        }
+    }
     
     /**
      * Accesses the public address for the EC2 instance.  This is necessary
@@ -40,77 +38,61 @@ public class AmazonEc2Utils
      * @return The public address for the EC2 instance, or <code>null</code> if
      * there's an error accessing the address.
      */
-    public static InetAddress getPublicAddress()
-        {
+    public static InetAddress getPublicAddress() {
         // First just check if we're even on Amazon -- we could be testing
         // locally, for example.
         LOG.debug("Getting public address");
-        
+
         final long now = System.currentTimeMillis();
-        if ((now - s_lastUpdateTime) < DateUtils.MILLIS_PER_MINUTE)
-            {
+        if ((now - s_lastUpdateTime) < DateUtils.MILLIS_PER_MINUTE) {
             LOG.debug("Using cached address...");
             return s_cachedAddress;
-            }
-        
-        // Check to see if we're running on EC2.  If we're not, we're probably 
-        // testing.  This technique could be a problem if the EC2 internal 
+        }
+
+        // Check to see if we're running on EC2. If we're not, we're probably
+        // testing. This technique could be a problem if the EC2 internal
         // addressing is ever different from 10.253.
-        try
-            {
-            if (!onEc2())
-                {
-                // Not running on EC2.  We might be testing, or this might be
+        try {
+            if (!onEc2()) {
+                // Not running on EC2. We might be testing, or this might be
                 // a server running on another system.
                 LOG.debug("Not running on EC2.");
                 return NetworkUtils.getLocalHost();
-                }
             }
-        catch (final UnknownHostException e)
-            {
+        } catch (final UnknownHostException e) {
             LOG.error("Could not get host.", e);
             return null;
-            }
+        }
         final String url = "http://169.254.169.254/latest/meta-data/public-ipv4";
         final DefaultHttpClient client = new DefaultHttpClientImpl();
-        client.getHttpConnectionManager().getParams().setConnectionTimeout(
-            20 * 1000);
+        client.getHttpConnectionManager().getParams()
+                .setConnectionTimeout(20 * 1000);
         final GetMethod method = new GetMethod(url);
-        try
-            {
+        try {
             LOG.debug("Executing method...");
             final int statusCode = client.executeMethod(method);
-            if (statusCode != HttpStatus.SC_OK)
-                {
-                LOG.warn("ERROR ISSUING REQUEST:\n" + method.getStatusLine() + 
-                    "\n" + method.getResponseBodyAsString());
+            if (statusCode != HttpStatus.SC_OK) {
+                LOG.warn("ERROR ISSUING REQUEST:\n" + method.getStatusLine()
+                        + "\n" + method.getResponseBodyAsString());
                 return null;
-                }
-            else
-                {
+            } else {
                 LOG.debug("Successfully received response...");
-                }
+            }
             final String host = method.getResponseBodyAsString();
-            LOG.debug("Got address: "+host);
+            LOG.debug("Got address: " + host);
             s_cachedAddress = InetAddress.getByName(host);
             s_lastUpdateTime = System.currentTimeMillis();
             return s_cachedAddress;
-            }
-        catch (final HttpException e)
-            {
+        } catch (final HttpException e) {
             LOG.error("Could not access EC2 service", e);
             return null;
-            }
-        catch (final IOException e)
-            {
+        } catch (final IOException e) {
             LOG.error("Could not access EC2 service", e);
             return null;
-            }
-        finally 
-            {
+        } finally {
             method.releaseConnection();
-            }
         }
+    }
 
     /**
      * Returns whether or not we're running on EC2.
@@ -118,18 +100,15 @@ public class AmazonEc2Utils
      * @return <code>true</code> if we're running on EC2, otherwise 
      * <code>false</code>.
      */
-    public static boolean onEc2()
-        {
+    public static boolean onEc2() {
         // Good enough for now to determine if we're running on EC2.
-        try
-            {
+        try {
             final String local = NetworkUtils.getLocalHost().getHostAddress();
-            return local.startsWith("10.25") || local.startsWith("10.241");
-            }
-        catch (final UnknownHostException e)
-            {
+            return local.startsWith("10.25") || local.startsWith("10.241")
+                    || local.startsWith("10.191");
+        } catch (final UnknownHostException e) {
             LOG.warn("Unknown host", e);
             return false;
-            }
         }
     }
+}
